@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ДомЧат · Дом №7</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0f1117;
+    font-family: "Inter", sans-serif;
+    min-height: 100vh;
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== ЭКРАН ВХОДА ===== */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: #111318;
+  }
+
+  .login-logo {
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  .login-logo .app-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #2ecc71, #1a9e55);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 12px;
+    box-shadow: 0 4px 20px rgba(46,204,113,0.3);
+  }
+
+  .login-logo h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #f0f0f0;
+    margin-bottom: 3px;
+  }
+
+  .login-logo p {
+    font-size: 12px;
+    color: #555;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 360px;
+    background: #1a1d24;
+    border: 1px solid #252830;
+    border-radius: 16px;
+    padding: 28px 24px;
+  }
+
+  .login-card h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f0f0f0;
+    margin-bottom: 4px;
+  }
+
+  .login-card p {
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 20px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 13px 16px;
+    background: #111318;
+    border: 1px solid #252830;
+    border-radius: 10px;
+    font-family: "Inter", sans-serif;
+    font-size: 15px;
+    color: #f0f0f0;
+    outline: none;
+    margin-bottom: 12px;
+    transition: border-color 0.15s;
+    letter-spacing: 0.1em;
+  }
+
+  .form-input:focus { border-color: #2ecc71; }
+  .form-input::placeholder { color: #333; letter-spacing: 0; }
+
+  .btn-login {
+    width: 100%;
+    padding: 14px;
+    background: #2ecc71;
+    border: none;
+    border-radius: 10px;
+    font-family: "Inter", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-login:hover { background: #27b563; }
+
+  .error-msg {
+    display: none;
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: #2a1a1a;
+    border: 1px solid #5a2020;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #c84040;
+    text-align: center;
+  }
+
+  .error-msg.show { display: block; }
+
+  /* ===== МЕССЕНДЖЕР ===== */
+  #appScreen {
+    display: none;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #111318;
+  }
+
+  /* Топбар */
+  .topbar {
+    background: #1a1d24;
+    border-bottom: 1px solid #252830;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .topbar-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #2ecc71, #1a9e55);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .topbar-info { flex: 1; }
+
+  .topbar-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #f0f0f0;
+  }
+
+  .topbar-status {
+    font-size: 11px;
+    color: #2ecc71;
+  }
+
+  /* LAYOUT */
+  .app-layout {
+    display: flex;
+    flex: 1;
+    min-height: calc(100vh - 61px);
+  }
+
+  /* Список чатов */
+  .chat-list {
+    width: 280px;
+    border-right: 1px solid #252830;
+    overflow-y: auto;
+    flex-shrink: 0;
+    background: #111318;
+  }
+
+  .chat-list-header {
+    padding: 16px;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #1a1d24;
+  }
+
+  .chat-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: background 0.1s;
+    border-bottom: 0.5px solid #1a1d24;
+    position: relative;
+  }
+
+  .chat-item:hover { background: #1a1d24; }
+  .chat-item.active { background: #1e2330; }
+
+  .chat-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .chat-avatar.group { border-radius: 12px; }
+
+  .unread-dot {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    background: #2ecc71;
+    border-radius: 50%;
+    border: 2px solid #111318;
+  }
+
+  .chat-info { flex: 1; overflow: hidden; }
+
+  .chat-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #f0f0f0;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chat-preview {
+    font-size: 12px;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chat-time {
+    font-size: 11px;
+    color: #444;
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+
+  .unread-count {
+    background: #2ecc71;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+
+  /* Область чата */
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .chat-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid #252830;
+    background: #1a1d24;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .chat-header-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .chat-header-avatar.group { border-radius: 10px; }
+
+  .chat-header-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #f0f0f0;
+  }
+
+  .chat-header-members {
+    font-size: 11px;
+    color: #555;
+  }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: #111318;
+  }
+
+  /* Дата */
+  .date-divider {
+    text-align: center;
+    margin: 12px 0 8px;
+  }
+
+  .date-divider span {
+    font-size: 11px;
+    color: #444;
+    background: #1a1d24;
+    padding: 4px 12px;
+    border-radius: 10px;
+  }
+
+  /* Сообщение */
+  .msg {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    max-width: 85%;
+  }
+
+  .msg.me {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+  }
+
+  .msg-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-bottom: 2px;
+  }
+
+  .msg-content { display: flex; flex-direction: column; gap: 2px; }
+
+  .msg-name {
+    font-size: 11px;
+    color: #555;
+    margin-left: 4px;
+    margin-bottom: 2px;
+  }
+
+  .msg-bubble {
+    padding: 9px 13px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #e0e0e0;
+    background: #1e2330;
+    border-radius: 16px 16px 16px 4px;
+    position: relative;
+  }
+
+  .msg.me .msg-bubble {
+    background: #1a3a1a;
+    border-radius: 16px 16px 4px 16px;
+    color: #d0f0d0;
+  }
+
+  .msg-time {
+    font-size: 10px;
+    color: #444;
+    margin: 0 4px;
+    align-self: flex-end;
+  }
+
+  .msg.me .msg-time { text-align: right; }
+
+  /* Системное сообщение */
+  .msg-system {
+    text-align: center;
+    font-size: 11px;
+    color: #444;
+    font-style: italic;
+    margin: 4px 0;
+  }
+
+  /* Эмодзи реакция */
+  .msg-reaction {
+    font-size: 12px;
+    margin-top: 2px;
+    margin-left: 4px;
+  }
+
+  /* Стикер/гороскоп */
+  .msg-sticker {
+    background: #1a1d24;
+    border: 1px solid #252830;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #c0c0c0;
+    line-height: 1.6;
+    max-width: 280px;
+  }
+
+  .msg-sticker .sticker-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
+    margin-bottom: 6px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* Поле ввода (декоративное) */
+  .chat-input {
+    padding: 12px 16px;
+    border-top: 1px solid #252830;
+    background: #1a1d24;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .input-field {
+    flex: 1;
+    padding: 10px 16px;
+    background: #111318;
+    border: 1px solid #252830;
+    border-radius: 20px;
+    font-size: 14px;
+    color: #555;
+    font-style: italic;
+    cursor: not-allowed;
+  }
+
+  .btn-send {
+    width: 38px;
+    height: 38px;
+    background: #2ecc71;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  /* Мобильная */
+  @media (max-width: 650px) {
+    .chat-list { width: 100%; border-right: none; }
+    .chat-area { display: none; }
+    .chat-list.hidden { display: none; }
+    .chat-area.mobile-show { display: flex; }
+    .app-layout { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ВХОД -->
+<div id="loginScreen">
+  <div class="login-logo">
+    <div class="app-icon">🏠</div>
+    <h1>ДомЧат</h1>
+    <p>Мессенджер для жителей · Дом №7</p>
+  </div>
+
+  <div class="login-card">
+    <h2>Введите код доступа</h2>
+    <p>Код выдаётся управляющей домом</p>
+    <input class="form-input" type="password" id="codeInput" placeholder="••••••" maxlength="10" autocomplete="off">
+    <button class="btn-login" onclick="tryLogin()">Войти</button>
+    <div class="error-msg" id="errorMsg">Неверный код. Попробуйте ещё раз.</div>
+  </div>
+</div>
+
+<!-- МЕССЕНДЖЕР -->
+<div id="appScreen">
+  <div class="topbar">
+    <div class="topbar-icon">🏠</div>
+    <div class="topbar-info">
+      <div class="topbar-name">ДомЧат · Дом №7</div>
+      <div class="topbar-status">● онлайн</div>
+    </div>
+  </div>
+
+  <div class="app-layout">
+
+    <!-- Список чатов -->
+    <div class="chat-list" id="chatList">
+      <div class="chat-list-header">Чаты</div>
+
+      <div class="chat-item active" onclick="showChat('home', this)">
+        <div class="chat-avatar group" style="background:#2a3a2a; font-size:20px;">🏘</div>
+        <div class="chat-info">
+          <div class="chat-name">Жильцы дома №7</div>
+          <div class="chat-preview">Матильда: ♓ РЫБЫ — неделя...</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <div class="chat-time">вчера</div>
+          <div class="unread-count">12</div>
+        </div>
+      </div>
+
+      <div class="chat-item" onclick="showChat('delivery', this)">
+        <div class="chat-avatar" style="background:#2a2a3a;">🛵</div>
+        <div class="chat-info">
+          <div class="chat-name">СберМаркет</div>
+          <div class="chat-preview">Ваш заказ доставлен. Спасибо!</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <div class="chat-time">17 нояб</div>
+        </div>
+      </div>
+
+      <div class="chat-item" onclick="showChat('uk', this)">
+        <div class="chat-avatar" style="background:#3a2a1a;">🔧</div>
+        <div class="chat-info">
+          <div class="chat-name">УК Уютный дом</div>
+          <div class="chat-preview">Плановое отключение воды 20...</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <div class="chat-time">15 нояб</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Область чата -->
+    <div class="chat-area" id="chatArea">
+
+      <div class="chat-header">
+        <div class="chat-header-avatar group" style="background:#2a3a2a;font-size:18px;">🏘</div>
+        <div>
+          <div class="chat-header-name">Жильцы дома №7</div>
+          <div class="chat-header-members">7 участников · Матильда Фрост, Геннадий Орлов, Вера Соколова...</div>
+        </div>
+      </div>
+
+      <div class="messages" id="messages"></div>
+
+      <div class="chat-input">
+        <div class="input-field">Только чтение...</div>
+        <div class="btn-send">➤</div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const CODE = 'дом7';
+
+  const chats = {
+    home: {
+      name: 'Жильцы дома №7',
+      avatar: '🏘',
+      members: '7 участников',
+      messages: [
+        { date: '11 ноября, понедельник' },
+        { system: 'Матильда Фрост создала группу «Жильцы дома №7»' },
+        { system: 'Матильда Фрост добавила: Геннадий Орлов, Вера Соколова, Павел Крот, Зинаида Муравьёва, Антон Лис, Ольга Птицына' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '10:02',
+          text: 'Дорогие соседи! Я, Матильда Карловна Фрост, управляющая вашим домом, создала этот чат для оперативного решения бытовых вопросов. Прошу соблюдать культуру общения. 🏠' },
+        { from: 'Геннадий', avatar: '👨‍🦳', color: '#2a3a4a', time: '10:15',
+          text: 'Здрасте. А по поводу трубы в подвале уже можно сюда писать? Она опять течёт.' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '10:17',
+          text: 'Геннадий Аркадьевич, КОНЕЧНО МОЖНО. Именно для этого чат и создан. Заявку я уже направила в УК.' },
+        { from: 'Вера', avatar: '👩‍🦰', color: '#3a4a2a', time: '10:31',
+          text: 'Спасибо Матильда Карловна! Очень удобно 🙏' },
+        { from: 'Зинаида', avatar: '👵', color: '#4a3a2a', time: '10:45',
+          text: 'А как сюда картинку отправить? Я хочу показать что у меня на лестнице написано. Безобразие.' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '10:48',
+          text: 'Зинаида Петровна, нажмите на скрепочку. Я вам покажу лично если что — зайдите в 12:00.' },
+
+        { date: '12 ноября, вторник' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '08:00',
+          sticker: true, stickerTitle: '🔮 Гороскоп на вторник от Матильды Карловны',
+          text: '♈ ОВЕН — день для решительных действий\n♉ ТЕЛЕЦ — избегайте конфликтов с соседями\n♊ БЛИЗНЕЦЫ — благоприятный день для уборки\n♋ РАК — что-то скрываете? Луна видит всё 🌙' },
+        { from: 'Геннадий', avatar: '👨‍🦳', color: '#2a3a4a', time: '08:14',
+          text: 'Матильда Карловна при всём уважении мне рак по гороскопу и я ничего не скрываю. Просто труба течёт.' },
+        { from: 'Антон', avatar: '🧔', color: '#2a4a3a', time: '09:22',
+          text: 'Вчера вечером кто-то опять курил в лифте. Очень прошу прекратить.' },
+        { from: 'Павел', avatar: '👨‍💻', color: '#4a2a3a', time: '09:45',
+          text: 'Антон, не смотри на меня. Я вообще не курю.' },
+        { from: 'Антон', avatar: '🧔', color: '#2a4a3a', time: '09:47',
+          text: 'Я и не смотрю. Просто говорю.' },
+        { from: 'Зинаида', avatar: '👵', color: '#4a3a2a', time: '11:30',
+          text: 'Это не из нашего дома кто-то. Я видела молодого человека с третьего этажа который заходил с сигаретой. Высокий такой.' },
+        { from: 'Вера', avatar: '👩‍🦰', color: '#3a4a2a', time: '11:33',
+          text: 'С третьего? Там же только Антон живёт?' },
+        { from: 'Антон', avatar: '🧔', color: '#2a4a3a', time: '11:35',
+          text: 'Это был мой племянник. Он в гостях был. Извините.' },
+        { reaction: '😤', from: 'Зинаида' },
+
+        { date: '13 ноября, среда' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '08:00',
+          sticker: true, stickerTitle: '🔮 Гороскоп на среду от Матильды Карловны',
+          text: '♌ ЛЕВ — остерегайтесь ложных друзей\n♍ ДЕВА — внимательность к деталям принесёт плоды\n♎ ВЕСЫ — правда всегда выходит наружу\n♏ СКОРПИОН — сегодня лучше молчать чем говорить лишнее 🤫' },
+        { from: 'Ольга', avatar: '👩‍🍳', color: '#4a2a4a', time: '10:12',
+          text: 'Доброе утро! Я пеку пироги, если кто хочет — стучитесь в кв. 4 после 15:00 🥧' },
+        { from: 'Вера', avatar: '👩‍🦰', color: '#3a4a2a', time: '10:14', text: '❤️❤️❤️ Обязательно!' },
+        { from: 'Зинаида', avatar: '👵', color: '#4a3a2a', time: '10:16', text: 'С чем пироги?' },
+        { from: 'Ольга', avatar: '👩‍🍳', color: '#4a2a4a', time: '10:17', text: 'С яблоками и с капустой!' },
+        { from: 'Геннадий', avatar: '👨‍🦳', color: '#2a3a4a', time: '10:20', text: 'А с мясом нет? 😔' },
+        { from: 'Ольга', avatar: '👩‍🍳', color: '#4a2a4a', time: '10:21', text: 'Геннадий Аркадьевич специально для вас сделаю 😄' },
+        { from: 'Павел', avatar: '👨‍💻', color: '#4a2a3a', time: '14:33',
+          text: 'Кто-нибудь знает пароль от wi-fi в подъезде? Роутер обновился и всё слетело' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '14:40',
+          text: 'Павел Игоревич, пароль я дам лично. Не надо его в чате писать. Конфиденциальность! 🔐' },
+        { from: 'Павел', avatar: '👨‍💻', color: '#4a2a3a', time: '14:41', text: 'Хорошо, зайду.' },
+
+        { date: '14 ноября, четверг' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '08:00',
+          sticker: true, stickerTitle: '🔮 Гороскоп на четверг от Матильды Карловны',
+          text: '♐ СТРЕЛЕЦ — что-то происходит за закрытыми дверями. Будьте внимательны.\n♑ КОЗЕРОГ — не доверяйте тем, кто приходит поздно ночью\n♒ ВОДОЛЕЙ — ваша интуиция не подведёт\n♓ РЫБЫ — ОСТОРОЖНО. Меркурий в ретрограде. 🪐' },
+        { from: 'Геннадий', avatar: '👨‍🦳', color: '#2a3a4a', time: '08:22',
+          text: 'Матильда Карловна кто приходит поздно ночью это вы про что конкретно?' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '08:25',
+          text: 'Геннадий Аркадьевич это ГОРОСКОП. Звёзды говорят что говорят. Я лишь передаю.' },
+        { from: 'Зинаида', avatar: '👵', color: '#4a3a2a', time: '09:14',
+          text: 'Кстати вчера ночью в час примерно кто-то долго звонил в домофон. Я не открыла конечно. Молчали в трубку.' },
+        { from: 'Антон', avatar: '🧔', color: '#2a4a3a', time: '09:20',
+          text: 'Зинаида Петровна это наверное доставка ошиблась домом' },
+        { from: 'Зинаида', avatar: '👵', color: '#4a3a2a', time: '09:22',
+          text: 'В час ночи?? Доставка??' },
+        { from: 'Вера', avatar: '👩‍🦰', color: '#3a4a2a', time: '11:00',
+          text: 'Соседи, а у кого-нибудь есть перфоратор? Мне полочку повесить надо' },
+        { from: 'Геннадий', avatar: '👨‍🦳', color: '#2a3a4a', time: '11:03',
+          text: 'У меня есть. Но только не в рабочие часы пожалуйста — я дома работаю.' },
+        { from: 'Вера', avatar: '👩‍🦰', color: '#3a4a2a', time: '11:04', text: 'В выходные можно?' },
+        { from: 'Геннадий', avatar: '👨‍🦳', color: '#2a3a4a', time: '11:05', text: 'В субботу после 12 — ок.' },
+
+        { date: '15 ноября, пятница' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '08:00',
+          sticker: true, stickerTitle: '🔮 Гороскоп на пятницу от Матильды Карловны',
+          text: '✨ ПЯТНИЦА — особый день для всех знаков!\n🌟 Кто-то в нашем доме хранит важную тайну. Звёзды видят всё. Луна не даст солгать. Честность — лучшая политика, дорогие соседи. 🌙' },
+        { from: 'Павел', avatar: '👨‍💻', color: '#4a2a3a', time: '08:11',
+          text: 'Матильда Карловна это угроза? 😂' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '08:13',
+          text: 'Павел Игоревич это АСТРОЛОГИЯ. Юмор здесь неуместен.' },
+        { from: 'Ольга', avatar: '👩‍🍳', color: '#4a2a4a', time: '10:44',
+          text: 'Соседи, вы не знаете случайно — вчера поздно вечером кто-то приходил к Антону? Я слышала голоса на лестнице около 23:00. Не хочу лезть не в своё дело просто было шумно.' },
+        { from: 'Антон', avatar: '🧔', color: '#2a4a3a', time: '10:52',
+          text: 'Ольга Михайловна это был коллега. Зашёл ненадолго по рабочему вопросу. Всё нормально.' },
+        { from: 'Зинаида', avatar: '👵', color: '#4a3a2a', time: '10:55',
+          text: 'Антон а коллега высокий темноволосый? Я его видела в лифте.' },
+        { from: 'Антон', avatar: '🧔', color: '#2a4a3a', time: '10:57',
+          text: 'Зинаида Петровна вы очень наблюдательная 😊 Да, он.' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '13:00',
+          text: 'Дорогие жильцы! Напоминаю — в субботу общая уборка подъезда в 11:00. Прошу всех принять участие. Список дежурных у меня. Отмазки не принимаются. 🧹' },
+        { from: 'Геннадий', avatar: '👨‍🦳', color: '#2a3a4a', time: '13:14', text: 'У меня спина...' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '13:15',
+          text: 'Геннадий Аркадьевич. В прошлый раз тоже спина. Придёте подержать мешок.' },
+        { reaction: '😭', from: 'Геннадий' },
+
+        { date: '16 ноября, суббота' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '08:00',
+          sticker: true, stickerTitle: '🔮 Субботний гороскоп от Матильды Карловны',
+          text: '🌟 СЕГОДНЯ ОСОБЫЙ ДЕНЬ\nВенера в соединении с Марсом. Тайны выходят на свет. Будьте готовы к неожиданным открытиям. Тот кто думает что его не видят — ошибается. 👁' },
+        { from: 'Павел', avatar: '👨‍💻', color: '#4a2a3a', time: '08:17',
+          text: 'Матильда Карловна вы точно просто про звёзды?' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '08:19',
+          text: 'Павел Игоревич. Звёзды — это серьёзно.' },
+        { from: 'Зинаида', avatar: '👵', color: '#4a3a2a', time: '10:48',
+          text: 'Соседи на уборку все пришли? Я уже с тряпкой стою.' },
+        { from: 'Вера', avatar: '👩‍🦰', color: '#3a4a2a', time: '10:50', text: 'Иду!' },
+        { from: 'Геннадий', avatar: '👨‍🦳', color: '#2a3a4a', time: '10:51', text: 'Спускаюсь. Спина болит.' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '10:52', text: 'Геннадий Аркадьевич. Мешок.' },
+        { from: 'Антон', avatar: '🧔', color: '#2a4a3a', time: '14:22',
+          text: 'Соседи, извините что пропустил уборку. Был занят. Компенсирую в следующий раз.' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '14:25',
+          text: 'Антон Валерьевич. Я всё записала. 📋' },
+        { from: 'Зинаида', avatar: '👵', color: '#4a3a2a', time: '16:30',
+          text: 'Кстати соседи. Я сегодня слышала через стену как Антон с кем-то разговаривал по телефону. Голос повышенный. Что-то про деньги. Не моё дело конечно но...' },
+        { from: 'Вера', avatar: '👩‍🦰', color: '#3a4a2a', time: '16:33', text: 'Зинаида Петровна 😅 ну бывает же...' },
+        { from: 'Павел', avatar: '👨‍💻', color: '#4a2a3a', time: '16:35', text: 'У всех бывают рабочие звонки.' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '16:40',
+          text: 'Зинаида Петровна наблюдательность это дар. Звёзды не случайно наградили вас Овном. 🐏' },
+
+        { date: '17 ноября, воскресенье' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '08:00',
+          sticker: true, stickerTitle: '🔮 Воскресный гороскоп от Матильды Карловны',
+          text: '☀️ ВОСКРЕСЕНЬЕ — день истины\nДорогие жильцы. Сегодня звёзды говорят: всё тайное станет явным. Кто бы что ни скрывал — правда выйдет наружу. Будьте честны прежде всего с собой. 🙏' },
+        { from: 'Геннадий', avatar: '👨‍🦳', color: '#2a3a4a', time: '09:05',
+          text: 'Матильда Карловна а что случилось-то? Вы уже третий день намекаете.' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '09:08',
+          text: 'Геннадий Аркадьевич. Ничего не случилось. Это ГОРОСКОП.' },
+        { from: 'Геннадий', avatar: '👨‍🦳', color: '#2a3a4a', time: '09:09', text: 'Ладно-ладно.' },
+        { from: 'Зинаида', avatar: '👵', color: '#4a3a2a', time: '11:15',
+          text: 'Соседи. Антон сегодня утром уехал с чемоданом. Я из окна видела. Такси вызвал.' },
+        { from: 'Вера', avatar: '👩‍🦰', color: '#3a4a2a', time: '11:17', text: 'Может в командировку?' },
+        { from: 'Зинаида', avatar: '👵', color: '#4a3a2a', time: '11:18',
+          text: 'С ТАКИМ чемоданом?? Это не командировка.' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '11:22',
+          text: 'Антон Валерьевич предупредил меня заранее. Уехал к родственникам. Прошу соблюдать спокойствие и не разводить панику. 🙏' },
+        { from: 'Павел', avatar: '👨‍💻', color: '#4a2a3a', time: '15:44',
+          text: 'Кстати. Кто-нибудь знает — у Антона была собака или нет? Я слышал лай из его квартиры.' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '15:50',
+          text: 'Павел Игоревич у Антона Валерьевича НЕТ собаки. Вам послышалось. Животные в нашем доме только с письменного разрешения управляющего. То есть меня. 📋' },
+        { from: 'Зинаида', avatar: '👵', color: '#4a3a2a', time: '15:52',
+          text: 'Я тоже слышала. Это не собака. Это был человек.' },
+        { from: 'Вера', avatar: '👩‍🦰', color: '#3a4a2a', time: '15:53', text: '😳' },
+        { from: 'Матильда', avatar: '👩‍💼', color: '#3a2a5a', time: '15:58',
+          text: 'Уважаемые жильцы. Прошу прекратить домыслы. Квартира №3 пустая. Антон уехал. Всё. Займитесь своими делами. 🏠' },
+      ]
+    },
+
+    delivery: {
+      name: 'СберМаркет',
+      avatar: '🛵',
+      members: 'сервисный чат',
+      messages: [
+        { date: '17 ноября' },
+        { from: 'СберМаркет', avatar: '🛵', color: '#2a3a4a', time: '14:22',
+          text: 'Ваш заказ №77291 передан курьеру. Ожидайте доставку.' },
+        { from: 'СберМаркет', avatar: '🛵', color: '#2a3a4a', time: '15:04',
+          text: 'Курьер прибыл. Заказ оставлен у двери. Спасибо за покупку! 🛒' },
+        { from: 'СберМаркет', avatar: '🛵', color: '#2a3a4a', time: '15:04',
+          text: 'Оцените доставку: ⭐⭐⭐⭐⭐' },
+      ]
+    },
+
+    uk: {
+      name: 'УК Уютный дом',
+      avatar: '🔧',
+      members: 'сервисный чат',
+      messages: [
+        { date: '15 ноября' },
+        { from: 'УК Уютный дом', avatar: '🔧', color: '#3a2a1a', time: '10:00',
+          text: 'Уважаемые жильцы! Плановое отключение горячей воды 20 ноября с 09:00 до 18:00. Приносим извинения за неудобства.' },
+        { from: 'УК Уютный дом', avatar: '🔧', color: '#3a2a1a', time: '10:01',
+          text: 'По вопросу течи в подвале (заявка №4421) — бригада прибудет 18 ноября.' },
+      ]
+    }
+  };
+
+  function tryLogin() {
+    const code = document.getElementById('codeInput').value.trim().toLowerCase();
+    if (code === CODE) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appScreen').style.display = 'flex'; showChat('home', document.querySelector('.chat-item'));
+      showChat('home');
+    } else {
+      document.getElementById('errorMsg').classList.add('show');
+      document.getElementById('codeInput').value = '';
+    }
+  }
+
+  function showChat(id, el) {
+    const chat = chats[id];
+    document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active')); if(el) el.classList.add('active');
+
+    const header = document.querySelector('.chat-header');
+    header.innerHTML = `
+      <div class="chat-header-avatar ${id === 'home' ? 'group' : ''}" style="background:#2a3a2a;font-size:18px;">${chat.avatar}</div>
+      <div>
+        <div class="chat-header-name">${chat.name}</div>
+        <div class="chat-header-members">${chat.members}</div>
+      </div>`;
+
+    const msgs = document.getElementById('messages');
+    msgs.innerHTML = '';
+
+    chat.messages.forEach(m => {
+      if (m.date) {
+        msgs.innerHTML += `<div class="date-divider"><span>${m.date}</span></div>`;
+      } else if (m.system) {
+        msgs.innerHTML += `<div class="msg-system">${m.system}</div>`;
+      } else if (m.reaction) {
+        msgs.innerHTML += `<div class="msg-reaction" style="text-align:right;margin-right:8px;">${m.reaction} ${m.from}</div>`;
+      } else if (m.sticker) {
+        msgs.innerHTML += `
+          <div class="msg">
+            <div class="msg-avatar" style="background:${m.color};">${m.avatar}</div>
+            <div class="msg-content">
+              <div class="msg-name">${m.from}</div>
+              <div class="msg-sticker">
+                <div class="sticker-title">${m.stickerTitle}</div>
+                ${m.text.replace(/\n/g, '<br>')}
+              </div>
+              <div class="msg-time">${m.time}</div>
+            </div>
+          </div>`;
+      } else {
+        msgs.innerHTML += `
+          <div class="msg">
+            <div class="msg-avatar" style="background:${m.color};">${m.avatar}</div>
+            <div class="msg-content">
+              <div class="msg-name">${m.from}</div>
+              <div class="msg-bubble">${m.text}</div>
+              <div class="msg-time">${m.time}</div>
+            </div>
+          </div>`;
+      }
+    });
+
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  document.getElementById('codeInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') tryLogin();
+  });
+</script>
+</body>
+</html>
