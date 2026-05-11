@@ -475,11 +475,31 @@
 
   /* Мобильная */
   @media (max-width: 650px) {
-    .chat-list { width: 100%; border-right: none; }
-    .chat-area { display: none; }
-    .chat-list.hidden { display: none; }
-    .chat-area.mobile-show { display: flex; }
     .app-layout { flex-direction: column; }
+    .chat-list { width: 100%; border-right: none; }
+    .chat-list.hidden { display: none !important; }
+    .chat-area { display: none; flex-direction: column; }
+    .chat-area.mobile-show { display: flex !important; }
+    .back-btn { display: flex; }
+  }
+
+  @media (min-width: 651px) {
+    .back-btn { display: none; }
+    .chat-area { display: flex; flex-direction: column; }
+  }
+
+  .back-btn {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 8px;
+    background: none;
+    border: none;
+    color: #2ecc71;
+    font-size: 15px;
+    font-family: "Inter", sans-serif;
+    cursor: pointer;
+    font-weight: 500;
   }
 </style>
 </head>
@@ -768,7 +788,11 @@
     const code = document.getElementById('codeInput').value.trim().toLowerCase();
     if (code === CODE) {
       document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('appScreen').style.display = 'flex'; showChat('home', document.querySelector('.chat-item'));
+      document.getElementById('appScreen').style.display = 'flex';
+      // Always show chat area immediately
+      document.getElementById('chatArea').style.display = 'flex';
+      document.getElementById('chatArea').classList.add('mobile-show');
+      showChat('home', document.querySelector('.chat-item'));
       showChat('home');
     } else {
       document.getElementById('errorMsg').classList.add('show');
@@ -780,6 +804,12 @@
     const chat = chats[id];
     document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
     document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active')); if(el) el.classList.add('active');
+
+    // Mobile: show chat area, hide list
+    if (window.innerWidth <= 650) {
+      document.getElementById('chatList').classList.add('hidden');
+      document.getElementById('chatArea').classList.add('mobile-show');
+    }
 
     const header = document.querySelector('.chat-header');
     header.innerHTML = `
@@ -826,6 +856,11 @@
     });
 
     msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function goBack() {
+    document.getElementById('chatList').classList.remove('hidden');
+    document.getElementById('chatArea').classList.remove('mobile-show');
   }
 
   document.getElementById('codeInput').addEventListener('keypress', e => {
